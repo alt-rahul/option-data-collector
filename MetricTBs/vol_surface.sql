@@ -1,4 +1,5 @@
-DECLARE @Year     INT  = 2010;
+--this is the volatility surface table
+DECLARE @Year     INT  = 2010; --change year here
 DECLARE @fromDate DATE = DATEFROMPARTS(@Year, 1, 1);
 DECLARE @toDate   DATE = DATEFROMPARTS(@Year, 12, 31);
 

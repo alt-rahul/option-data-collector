@@ -1,4 +1,5 @@
-DECLARE @Year     INT  = 2010;
+--this is atm forward options table 
+DECLARE @Year     INT  = 2010; --year change
 DECLARE @fromDate DATE = DATEFROMPARTS(@Year, 1, 1);
 DECLARE @toDate   DATE = DATEFROMPARTS(@Year, 12, 31);
 
@@ -6,7 +7,7 @@ SELECT
     sop.SecurityID,
     sn.Ticker,
     sop.Date,
-    sop.Days,             -- 10, 30, 60, ... 730
+    sop.Days,             
     sop.CallPut,
     sop.ForwardPrice,
     sop.Strike,

@@ -1,4 +1,5 @@
-DECLARE @Year     INT  = 2010;
+--standardized borrow rates
+DECLARE @Year     INT  = 2010; -- year change
 DECLARE @fromDate DATE = DATEFROMPARTS(@Year, 1, 1);
 DECLARE @toDate   DATE = DATEFROMPARTS(@Year, 12, 31);
 

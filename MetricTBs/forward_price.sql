@@ -1,5 +1,5 @@
-
-DECLARE @Year     INT  = 2010;
+--forward prices table
+DECLARE @Year     INT  = 2010; --year chage
 DECLARE @fromDate DATE = DATEFROMPARTS(@Year, 1, 1);
 DECLARE @toDate   DATE = DATEFROMPARTS(@Year, 12, 31);
 
