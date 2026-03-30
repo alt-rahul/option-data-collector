@@ -34,4 +34,5 @@ JOIN Security_Name sn
     )
 WHERE ov.Date BETWEEN @fromDate AND @toDate
   AND ov.SecurityID IN (SELECT SecurityID FROM SP500_Top100)
+  AND ov.OpenInterest > 0   -- drop days with no active open interest
 ORDER BY sn.Ticker, ov.Date, ov.CallPut;

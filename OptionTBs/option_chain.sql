@@ -1,4 +1,8 @@
--- Top 100 S&P 500 stocks (by avg market cap 2020-2025), full option chain
+-- Top 100 S&P 500 stocks (by avg market cap 2020-2025)
+-- Filters to liquid, tradeable contracts within 70%-130% moneyness band (±30% of spot).
+-- Eliminates stale/dead quotes (BestBid > 0) and zero-interest rows (OpenInterest > 0).
+-- Typical yield: ~12-15 liquid strikes per expiration after filters, ~100-200 contracts
+-- per ticker per day across calls, puts, and 5-8 active expirations.
 -- Date range: 2020-01-01 to 2025-12-31
 DECLARE @fromDate DATE = '2020-01-01';
 DECLARE @toDate   DATE = '2025-12-31';
@@ -24,7 +28,8 @@ SELECT
     op.Date,
     op.Symbol,
     op.SymbolFlag,
-    CAST(op.Strike AS FLOAT) / 1000.0 AS Strike,  -- IvyDB stores strike * 1000
+    CAST(op.Strike AS FLOAT) / 1000.0                    AS Strike,
+    CAST(op.Strike AS FLOAT) / 1000.0 / up.ClosePrice    AS Moneyness,  -- K/S
     op.Expiration,
     op.CallPut,
     op.BestBid,
@@ -42,6 +47,10 @@ SELECT
     op.ExpiryIndicator,
     op.AdjustmentFactor
 FROM Option_Price op
+JOIN Security_Price up
+  ON up.SecurityID = op.SecurityID
+ AND up.Date       = op.Date
+ AND up.ClosePrice > 0
 JOIN Security_Name sn
   ON sn.SecurityID = op.SecurityID
  AND sn.Date = (
@@ -52,4 +61,10 @@ JOIN Security_Name sn
     )
 WHERE op.Date BETWEEN @fromDate AND @toDate
   AND op.SecurityID IN (SELECT SecurityID FROM SP500_Top100)
-ORDER BY sn.Ticker, op.Date, op.Expiration, Strike, op.CallPut;
+  -- Liquidity filters: eliminate stale quotes and dead contracts
+  AND op.BestBid      > 0
+  AND op.OpenInterest > 0
+  -- Moneyness band: keep strikes within 70%-130% of underlying price (±30%)
+  -- Strike is stored as actual_strike * 1000 in IvyDB
+  AND CAST(op.Strike AS FLOAT) / 1000.0 / up.ClosePrice BETWEEN 0.70 AND 1.30
+ORDER BY sn.Ticker, op.Date, op.Expiration, CAST(op.Strike AS FLOAT) / 1000.0, op.CallPut;
