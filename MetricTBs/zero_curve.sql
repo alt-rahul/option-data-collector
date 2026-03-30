@@ -1,7 +1,7 @@
--- zero curve table
-DECLARE @Year     INT  = 2010; -- chage year here
-DECLARE @fromDate DATE = DATEFROMPARTS(@Year, 1, 1);
-DECLARE @toDate   DATE = DATEFROMPARTS(@Year, 12, 31);
+-- Risk-free zero curve (market-wide, no security filter)
+-- Date range: 2020-01-01 to 2025-12-31
+DECLARE @fromDate DATE = '2020-01-01';
+DECLARE @toDate   DATE = '2025-12-31';
 
 SELECT
     zc.Date,

@@ -1,13 +1,26 @@
---this is the historical volatility table
-DECLARE @Year     INT  = 2010; -- change the year here
-DECLARE @fromDate DATE = DATEFROMPARTS(@Year, 1, 1);
-DECLARE @toDate   DATE = DATEFROMPARTS(@Year, 12, 31);
+-- Historical realized volatility for top 100 S&P 500 stocks
+-- Date range: 2020-01-01 to 2025-12-31
+DECLARE @fromDate DATE = '2020-01-01';
+DECLARE @toDate   DATE = '2025-12-31';
 
+WITH SP500_Top100 AS (
+    SELECT TOP 100
+        sp.SecurityID
+    FROM Security_Price sp
+    JOIN Security s ON s.SecurityID = sp.SecurityID
+    WHERE sp.Date BETWEEN @fromDate AND @toDate
+      AND s.IssueType  = '0'
+      AND s.IndexFlag  = '0'
+      AND sp.ClosePrice       > 0
+      AND sp.SharesOutstanding > 0
+    GROUP BY sp.SecurityID
+    ORDER BY AVG(ABS(sp.ClosePrice) * CAST(sp.SharesOutstanding AS FLOAT) * 1000) DESC
+)
 SELECT
     hv.SecurityID,
     sn.Ticker,
     hv.Date,
-    hv.Days,         
+    hv.Days,
     hv.Volatility
 FROM Historical_Volatility hv
 JOIN Security_Name sn
@@ -19,4 +32,5 @@ JOIN Security_Name sn
           AND sn2.Date <= hv.Date
     )
 WHERE hv.Date BETWEEN @fromDate AND @toDate
+  AND hv.SecurityID IN (SELECT SecurityID FROM SP500_Top100)
 ORDER BY sn.Ticker, hv.Date, hv.Days;
